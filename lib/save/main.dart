@@ -56,7 +56,7 @@ void tampilkanKartuBarang(Barang barang1){
   print('Lokasi berada di: ${lokasiRak(barang1.kategori)}');
 }
 
-void transaksi(Barang barang1, member, totalHarga){
+void transaksi(Barang barang1, jumlah, member){
   num harga = 0;
   double potongan = 0;
 
@@ -65,22 +65,23 @@ void transaksi(Barang barang1, member, totalHarga){
   } else {
     harga = barang1.hargaUmum;
   }
+  num belanjaAwal = harga * jumlah;
 
-  if (totalHarga > 200000) {
+  if (belanjaAwal > 200000) {
     potongan = 0.1;
-  } else if (totalHarga > 100000) {
+  } if (belanjaAwal > 100000) {
     potongan = 0.05;
   }
 
-  num hargaAkhir = totalHarga - (totalHarga * potongan);
+  num hargaAkhir = belanjaAwal - (belanjaAwal * potongan);
 
   print("\n=== TRANSAKSI ===");
   print('Member: ${member ? "Ya" : "Tidak"}');
   print('Nama barang: ${barang1.nama}');
   print('Harga barang: ${formatRupiah.format(harga)}');
-  print('Potongan: ${potongan*100}%');
-  print('Total potongan: ${formatRupiah.format(totalHarga * potongan)}');
-  print('Total belanja awal: $totalHarga');
+  print('Jumlah barang: $jumlah');
+  print('Total potongan: ${formatRupiah.format(potongan)}');
+  print('Total belanja awal: $belanjaAwal');
   print('='*18);
   print('Total harga akhir: $hargaAkhir');
 
@@ -108,9 +109,9 @@ void main() {
   tampilkanKartuBarang(barang1);
   tampilkanKartuBarang(barang2);
 
-  transaksi(barang1, true, 250000);
-  transaksi(barang1, false, 150000);
-  transaksi(barang1, false, 50000);
+  transaksi(barang1, 3, true);
+  transaksi(barang1, 5, false);
+  transaksi(barang1, 2, false);
 
   runApp(const MyApp());
 }
