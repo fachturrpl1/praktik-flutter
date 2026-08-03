@@ -1,6 +1,53 @@
 import 'package:flutter/material.dart';
 
+class Barang {
+  final String nama;
+  final num hargaMember;
+  final num hargaUmum;
+  final int stock;
+  final bool tersedia;
+
+Barang({
+  required this.nama,
+  required this.hargaMember,
+  required this.hargaUmum,
+  required this.stock,
+  required this.tersedia,
+});
+}
+
+void tampilkanKartuBarang(Barang barang1){
+  print("=== KARTU DATA BARANG ===");
+  print("nama barang: ${barang1.nama}");
+  print("harga anggota: Rp${barang1.hargaMember}");
+  print("harga umum: Rp${barang1.hargaUmum}");
+  print("jumlah stok: ${barang1.stock}");
+  print("tersedia: ${barang1.tersedia}");
+}
+
+void hitung(Barang barang1, jumlah){
+  num totalAnggota = jumlah * barang1.hargaMember;
+  num totalUmum = jumlah * barang1.hargaUmum;
+  num selisih = totalUmum - totalAnggota;
+  print('Total (anggota) ${jumlah} pcs: Rp${totalAnggota}}');
+  print('Selisih vs Umum: Rp${selisih}');
+
+}
+
+
 void main() {
+  
+  Barang barang1 = Barang(
+    nama: "Buku Tulis",
+    hargaMember: 3000.0,
+    hargaUmum: 3500.0,
+    stock: 40,
+    tersedia: true,
+  );
+
+  tampilkanKartuBarang(barang1);
+  hitung(barang1, 3);
+
   runApp(const MyApp());
 }
 
