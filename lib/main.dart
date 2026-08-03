@@ -65,8 +65,9 @@ void transaksi(Barang barang1, member, totalHarga){
   } else {
     harga = barang1.hargaUmum;
   }
-
-  if (totalHarga > 200000) {
+  if (member && (totalHarga > 500000)){
+    potongan = 0.15;
+  } else if (totalHarga > 200000) {
     potongan = 0.1;
   } else if (totalHarga > 100000) {
     potongan = 0.05;
@@ -80,12 +81,11 @@ void transaksi(Barang barang1, member, totalHarga){
   print('Harga barang: ${formatRupiah.format(harga)}');
   print('Potongan: ${potongan*100}%');
   print('Total potongan: ${formatRupiah.format(totalHarga * potongan)}');
-  print('Total belanja awal: $totalHarga');
+  print('Total belanja awal: ${formatRupiah.format(totalHarga)}');
   print('='*18);
-  print('Total harga akhir: $hargaAkhir');
+  print('Total harga akhir: ${formatRupiah.format(hargaAkhir)}');
 
 }
-
 
 void main() {
   
@@ -108,7 +108,7 @@ void main() {
   tampilkanKartuBarang(barang1);
   tampilkanKartuBarang(barang2);
 
-  transaksi(barang1, true, 250000);
+  transaksi(barang1, true, 700000);
   transaksi(barang1, false, 150000);
   transaksi(barang1, false, 50000);
 
