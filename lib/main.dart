@@ -68,15 +68,25 @@ void tampilkanKartuBarang(Barang barang1){
   print('Lokasi berada di: ${lokasiRak(barang1.kategori)}');
 }
 
+double hitungHarga(bool anggota, double hAnggota, double hUmum) {
+  return anggota ? hAnggota : hUmum;
+}
 double hitungTotal(int jumlah, double harga) {
   return jumlah * harga;
 }
+double hitungNominalPotongan(double total, double persenPotongan) {
+  return (total * persenPotongan / 100);
+}
 double hitungHargaAkhir(double total, double persenPotongan) {
-  return total - (total * persenPotongan / 100);
+  return total - hitungNominalPotongan(total, persenPotongan);
+}
+double bayarAkhir(int jumlah, double hargaSatuan, double persenPotongan){
+  double totalAwal = hitungTotal(jumlah, hargaSatuan);
+  return hitungHargaAkhir(totalAwal, persenPotongan);
 }
 
 void transaksi(Barang barang, bool member, int jumlah) {
-  double hargaSatuan = member ? barang.hargaMember : barang.hargaUmum;
+  double hargaSatuan = hitungHarga(member, barang.hargaMember, barang.hargaUmum);
   double totalAwal = hitungTotal(jumlah, hargaSatuan);
 
   if (totalAwal <= 0) {
@@ -101,8 +111,8 @@ void transaksi(Barang barang, bool member, int jumlah) {
     persenPotongan = 0.05;
   }
 
-  double nominalPotongan = totalAwal * (persenPotongan / 100);
-  double hargaAkhir = hitungHargaAkhir(totalAwal, persenPotongan);
+  double nominalPotongan = hitungNominalPotongan(totalAwal, persenPotongan);
+  double hargaAkhir = bayarAkhir(jumlah, hargaSatuan, persenPotongan);
 
   print("\n=== TRANSAKSI ===");
   print('Member            : ${member ? "Ya" : "Tidak"}');
