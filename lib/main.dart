@@ -9,12 +9,13 @@ final formatRupiah = NumberFormat.currency(
 
 class Barang {
   final String namaBarang;
-  final num hargaMember;
-  final num hargaUmum;
+  final double hargaMember;
+  final double hargaUmum;
   final String kategori;
   bool get tersedia => stock > 0;
   int stock;
-  num potongan = 0;
+  double potongan = 0;
+
 Barang({
   required this.namaBarang,
   required this.hargaMember,
@@ -22,6 +23,15 @@ Barang({
   required this.stock,
   required this.kategori,
 });
+}
+
+String statusBarang(bool tersedia) {
+  switch (tersedia) {
+    case true:
+      return "iya";
+    case false:
+      return "tidak";
+  }
 }
 
 String lokasiRak(String kategori) {
@@ -37,14 +47,6 @@ String lokasiRak(String kategori) {
   }
 }
 
-String statusBarang(bool tersedia) {
-  switch (tersedia) {
-    case true:
-      return "iya";
-    case false:
-      return "tidak";
-  }
-}
 
 void daftarBarangBernomor(List<Barang> daftarBarang) {
   print("\n=== DAFTAR BARANG ===");
@@ -66,46 +68,52 @@ void tampilkanKartuBarang(Barang barang1){
   print('Lokasi berada di: ${lokasiRak(barang1.kategori)}');
 }
 
-void transaksi(Barang barang1, bool member, int jumlah, num totalHarga){
-  totalHarga = jumlah * (member ? barang1.hargaMember : barang1.hargaUmum);
+double hitungTotal(int jumlah, double harga) {
+  return jumlah * harga;
+}
+double hitungHargaAkhir(double total, double persenPotongan) {
+  return total - (total * persenPotongan / 100);
+}
 
-  if (totalHarga <= 0) {
+void transaksi(Barang barang, bool member, int jumlah) {
+  double hargaSatuan = member ? barang.hargaMember : barang.hargaUmum;
+  double totalAwal = hitungTotal(jumlah, hargaSatuan);
+
+  if (totalAwal <= 0) {
     print("\n=== TRANSAKSI ===");
     print("Total harga tidak valid. Transaksi dibatalkan.");
     return;
   }
 
-  num harga = 0;
+  double harga = 0;
   if (member) {
-    harga = barang1.hargaMember;
+    harga = barang.hargaMember;
   } else {
-    harga = barang1.hargaUmum;
+    harga = barang.hargaUmum;
   }
 
-  double potongan = 0;
-  if (member && (totalHarga > 500000)){
-    potongan = 0.15;
-  } else if (totalHarga > 200000) {
-    potongan = 0.1;
-  } else if (totalHarga > 100000) {
-    potongan = 0.05;
+  double persenPotongan = 0;
+  if (member && (harga > 500000)){
+    persenPotongan = 0.15;
+  } else if (harga > 200000) {
+    persenPotongan = 0.1;
+  } else if (harga > 100000) {
+    persenPotongan = 0.05;
   }
 
-  barang1.stock -= jumlah;
-
-  num hargaAkhir = totalHarga - (totalHarga * potongan);
+  double nominalPotongan = totalAwal * (persenPotongan / 100);
+  double hargaAkhir = hitungHargaAkhir(totalAwal, persenPotongan);
 
   print("\n=== TRANSAKSI ===");
-  print('Member: ${member ? "Ya" : "Tidak"}');
-  print('Nama barang: ${barang1.namaBarang}');
-  print('Harga barang: ${formatRupiah.format(harga)}');
-  print('Jumlah beli: $jumlah');
-  print('Potongan: ${potongan*100}%');
-  print('Total potongan: ${formatRupiah.format(totalHarga * potongan)}');
-  print('Total belanja awal: ${formatRupiah.format(totalHarga)}');
-  print('='*18);
-  print('Total harga akhir: ${formatRupiah.format(hargaAkhir)}');
-
+  print('Member            : ${member ? "Ya" : "Tidak"}');
+  print('Nama barang       : ${barang.namaBarang}');
+  print('Harga barang      : ${formatRupiah.format(hargaSatuan)}');
+  print('Jumlah beli       : $jumlah');
+  print('Total belanja awal: ${formatRupiah.format(totalAwal)}');
+  print('Potongan          : $persenPotongan%');
+  print('Nominal potongan  : ${formatRupiah.format(nominalPotongan)}');
+  print('=' * 28);
+  print('Total harga akhir : ${formatRupiah.format(hargaAkhir)}');
 }
 
 void stockPenjualan(Barang barang, int stock){
@@ -114,16 +122,17 @@ void stockPenjualan(Barang barang, int stock){
     barang.stock--; //jika line ini dihapus, akan menyebabkan infinite loop
     print("Terjual 1, sisa stok: ${barang.stock}");
   }
-}
-// 1. Jika kondisi berhenti pada 'while' keliru:
-// - Program dapat mengalami 'infinite loop'
-// - Menimbulkan laporan keuangan/stok tidak valid.
+  // 1. Jika kondisi berhenti pada 'while' keliru:
+  // - Program dapat mengalami 'infinite loop'
+  // - Menimbulkan laporan keuangan/stok tidak valid.
 
-// 2. Cara memastikan koperasi tidak menjual melebihi stok:
-// - Menggunakan validasi kondisi sebelum transaksi: 'if (jumlah <= barang.stock)'.
-// - Jika stok mencukupi, kurangi stok ('barang.stock -= jumlah') dan lanjutkan transaksi.
-// - Jika stok kurang, batalkan transaksi dan tampilkan pesan peringatan bahwa stok tidak mencukupi.
-// - Menjaga kondisi perulangan dengan 'while (barang.stock > 0)' agar perulangan otomatis berhenti tepat saat stok bernilai 0.
+  // 2. Cara memastikan koperasi tidak menjual melebihi stok:
+  // - Menggunakan validasi kondisi sebelum transaksi: 'if (jumlah <= barang.stock)'.
+  // - Jika stok mencukupi, kurangi stok ('barang.stock -= jumlah') dan lanjutkan transaksi.
+  // - Jika stok kurang, batalkan transaksi dan tampilkan pesan peringatan bahwa stok tidak mencukupi.
+  // - Menjaga kondisi perulangan dengan 'while (barang.stock > 0)' agar perulangan otomatis berhenti tepat saat stok bernilai 0.
+
+}
 
 //data dari list 
 void totalStock(List<Barang> daftarBarang, String namaBarang, int stock) {
@@ -145,17 +154,15 @@ void totalStock(List<Barang> daftarBarang, String namaBarang, int stock) {
 
 void lowStock(List<Barang> daftarBarang) {
   print("\n==== STOK MENIPIS ====");
-  bool lowOnStock = false;
   for (var barang in daftarBarang) {
     if (barang.stock < 5) {
       print("${barang.namaBarang}: sisa ${barang.stock} pcs (Kategori: ${barang.kategori})");
-      lowOnStock = true;
     }
   }
 }
 
 void main() {
-  
+  //daftar barang
   Barang barang1 = Barang(
     namaBarang: "Buku Tulis",
     hargaMember: 3000.0,
@@ -174,11 +181,12 @@ void main() {
 
   List<Barang> koperasi = [barang1, barang2];
 
+//memanggil fungsi
   daftarBarangBernomor(koperasi);
   // tampilkanKartuBarang(barang1);
   // tampilkanKartuBarang(barang2);
 
-  // transaksi(barang1, true, 1, 700000);
+  transaksi(barang1, true, 2);
   // transaksi(barang1, false, 1, 150000);
   // transaksi(barang1, false, 1, 50000);
 
