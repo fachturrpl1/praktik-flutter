@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+final formatRupiah = NumberFormat.currency(
+  locale: 'id_ID',
+  symbol: 'Rp',
+  decimalDigits: 2
+  );
+
 class Barang {
-  final String nama;
+  final String namaBarang;
   final num hargaMember;
   final num hargaUmum;
-  int stock;
-  bool get tersedia => stock > 0;
-  num potongan = 0;
   final String kategori;
+  bool get tersedia => stock > 0;
+  int stock;
+  num potongan = 0;
 Barang({
-  required this.nama,
+  required this.namaBarang,
   required this.hargaMember,
   required this.hargaUmum,
   required this.stock,
   required this.kategori,
 });
 }
-
-final formatRupiah = NumberFormat.currency(
-  locale: 'id_ID',
-  symbol: 'Rp',
-  decimalDigits: 0
-  );
 
 String lokasiRak(String kategori) {
   switch (kategori) {
@@ -46,33 +46,19 @@ String statusBarang(bool tersedia) {
   }
 }
 
-void daftarBarangBernomor(Barang barang1){
-  List<String> daftarBarang = [
-    "Buku Tulis",
-    "Pulpen",
-    "Penghapus",
-    "Roti"
-  ];
-
-  List<num> daftarHarga = [
-    3000,
-    2500,
-    1500,
-    5000
-  ];
-
+void daftarBarangBernomor(List<Barang> daftarBarang) {
+  print("\n=== DAFTAR BARANG ===");
   for (int i = 0; i < daftarBarang.length; i++){
     String nomor = "${i + 1}. ";
-    String barang = "${daftarBarang[i]}";
-    String harga = "${formatRupiah.format(daftarHarga[i])}";
-
+    String barang = "${daftarBarang[i].namaBarang}";
+    String harga = "${formatRupiah.format(daftarBarang[i].hargaUmum)}";
     print("${nomor}${barang} - ${harga}");
   }
 }
 
 void tampilkanKartuBarang(Barang barang1){
   print("\n=== KARTU DATA BARANG ===");
-  print("nama barang: ${barang1.nama}");
+  print("nama barang: ${barang1.namaBarang}");
   print("harga anggota: ${formatRupiah.format(barang1.hargaMember)}");
   print("harga umum: ${formatRupiah.format(barang1.hargaUmum)}");
   print("jumlah stok: ${barang1.stock}");
@@ -111,7 +97,7 @@ void transaksi(Barang barang1, bool member, int jumlah, num totalHarga){
 
   print("\n=== TRANSAKSI ===");
   print('Member: ${member ? "Ya" : "Tidak"}');
-  print('Nama barang: ${barang1.nama}');
+  print('Nama barang: ${barang1.namaBarang}');
   print('Harga barang: ${formatRupiah.format(harga)}');
   print('Jumlah beli: $jumlah');
   print('Potongan: ${potongan*100}%');
@@ -122,9 +108,8 @@ void transaksi(Barang barang1, bool member, int jumlah, num totalHarga){
 
 }
 
-
 void stockPenjualan(Barang barang, int stock){
-  print("\n--- Penjualan ${barang.nama} ---");
+  print("\n--- Penjualan ${barang.namaBarang} ---");
   while (barang.stock > 0) { //jika operator '> 0' dihapus, akan menyebabkan infinite loop
     barang.stock--; //jika line ini dihapus, akan menyebabkan infinite loop
     print("Terjual 1, sisa stok: ${barang.stock}");
@@ -140,10 +125,39 @@ void stockPenjualan(Barang barang, int stock){
 // - Jika stok kurang, batalkan transaksi dan tampilkan pesan peringatan bahwa stok tidak mencukupi.
 // - Menjaga kondisi perulangan dengan 'while (barang.stock > 0)' agar perulangan otomatis berhenti tepat saat stok bernilai 0.
 
+//data dari list 
+void totalStock(List<Barang> daftarBarang, String namaBarang, int stock) {
+  int index = daftarBarang.indexWhere(
+    (b) => b.namaBarang.toLowerCase() == namaBarang.toLowerCase(),
+  );
+
+  if (index != -1) {
+    Barang barangTerpilih = daftarBarang[index];
+    num hargaBarang = barangTerpilih.hargaUmum;
+    num total = stock * hargaBarang;
+    print(
+      "${barangTerpilih.namaBarang}: $stock x ${formatRupiah.format(hargaBarang)} = ${formatRupiah.format(total)}",
+    );
+  } else {
+    print("Barang '$namaBarang' tidak ditemukan!");
+  }
+}
+
+void lowStock(List<Barang> daftarBarang) {
+  print("\n==== STOK MENIPIS ====");
+  bool lowOnStock = false;
+  for (var barang in daftarBarang) {
+    if (barang.stock < 5) {
+      print("${barang.namaBarang}: sisa ${barang.stock} pcs (Kategori: ${barang.kategori})");
+      lowOnStock = true;
+    }
+  }
+}
+
 void main() {
   
   Barang barang1 = Barang(
-    nama: "Buku Tulis",
+    namaBarang: "Buku Tulis",
     hargaMember: 3000.0,
     hargaUmum: 3500.0,
     stock: 3,
@@ -151,25 +165,33 @@ void main() {
   );
 
   Barang barang2 = Barang(
-    nama: "Roti",
+    namaBarang: "Roti",
     hargaMember: 2000.0,
     hargaUmum: 2500.0,
-    stock: 100,
+    stock: 2,
     kategori: "makanan",
   );
 
-  // print("\n=== DAFTAR BARANG ===");
-  // daftarBarangBernomor(barang1);
+  List<Barang> koperasi = [barang1, barang2];
 
+  daftarBarangBernomor(koperasi);
   // tampilkanKartuBarang(barang1);
   // tampilkanKartuBarang(barang2);
 
   // transaksi(barang1, true, 1, 700000);
   // transaksi(barang1, false, 1, 150000);
-  // // transaksi(barang1, false, 50000);
+  // transaksi(barang1, false, 1, 50000);
 
-  // prosesPenjualanBukuTulis(barang1);
-  stockPenjualan(barang1, 3);
+  // stockPenjualan(barang1, 3);
+  print("\n========= KOPERASI ========");
+  print("==== TOTAL STOK BARANG ====");
+  print("nama | stok | harga | total ");
+  totalStock(koperasi, "Buku Tulis", 3);
+  totalStock(koperasi, "Pulpen", 10);
+  totalStock(koperasi, "Blupen", 5);
+
+  lowStock(koperasi);
+
   runApp(const MyApp());
 }
 
