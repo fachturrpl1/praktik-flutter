@@ -12,9 +12,16 @@ class Barang {
   final double hargaMember;
   final double hargaUmum;
   final String kategori;
-  bool get tersedia => stock > 0;
   int stock;
   double potongan = 0;
+
+  bool cekTersedia() {
+    if (stock > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
 Barang({
   required this.namaBarang,
@@ -23,7 +30,18 @@ Barang({
   required this.stock,
   required this.kategori,
 });
+
+void tampilkanKartuBarang(){
+  print("\n=== KARTU DATA BARANG ===");
+  print("nama barang: ${namaBarang}");
+  print("harga anggota: ${formatRupiah.format(hargaMember)}");
+  print("harga umum: ${formatRupiah.format(hargaUmum)}");
+  print("jumlah stok: ${stock}");
+  print("tersedia: ${statusBarang(cekTersedia())}");
+  print('Lokasi berada di: ${lokasiRak(kategori)}');
 }
+}
+
 
 String statusBarang(bool tersedia) {
   switch (tersedia) {
@@ -47,7 +65,6 @@ String lokasiRak(String kategori) {
   }
 }
 
-
 void daftarBarangBernomor(List<Barang> daftarBarang) {
   print("\n=== DAFTAR BARANG ===");
   for (int i = 0; i < daftarBarang.length; i++){
@@ -56,16 +73,6 @@ void daftarBarangBernomor(List<Barang> daftarBarang) {
     String harga = "${formatRupiah.format(daftarBarang[i].hargaUmum)}";
     print("${nomor}${barang} - ${harga}");
   }
-}
-
-void tampilkanKartuBarang(Barang barang1){
-  print("\n=== KARTU DATA BARANG ===");
-  print("nama barang: ${barang1.namaBarang}");
-  print("harga anggota: ${formatRupiah.format(barang1.hargaMember)}");
-  print("harga umum: ${formatRupiah.format(barang1.hargaUmum)}");
-  print("jumlah stok: ${barang1.stock}");
-  print("tersedia: ${statusBarang(barang1.tersedia)}");
-  print('Lokasi berada di: ${lokasiRak(barang1.kategori)}');
 }
 
 double hitungHarga(bool anggota, double hAnggota, double hUmum) {
@@ -182,6 +189,14 @@ void main() {
   );
 
   Barang barang2 = Barang(
+    namaBarang: "Pulpen",
+    hargaMember: 2500.0,
+    hargaUmum: 3000.0,
+    stock: 10,
+    kategori: "atk"
+  );
+
+  Barang barang3= Barang(
     namaBarang: "Roti",
     hargaMember: 2000.0,
     hargaUmum: 2500.0,
@@ -189,26 +204,35 @@ void main() {
     kategori: "makanan",
   );
 
-  List<Barang> koperasi = [barang1, barang2];
+  List<Barang> koperasi = [barang1, barang2, barang3];
 
 //memanggil fungsi
-  daftarBarangBernomor(koperasi);
-  // tampilkanKartuBarang(barang1);
-  // tampilkanKartuBarang(barang2);
+  // daftarBarangBernomor(koperasi);
+  print("===| DAFTAR BARANG KOPERASI |===");
+  for (var barang in koperasi) {
+    barang.tampilkanKartuBarang();
+  }
 
-  transaksi(barang1, true, 2);
+/*
+   1. Data & method dibungkus dalam class 'Barang', bukan diluarnya
+   2. Tambah barang cukup buat object baru & masuk List<Barang>;
+      looping otomatis mencetak semua tanpa tambah kode cetak
+   3. Kode lebih bersih, rapi, terstruktur
+*/
+
+  // transaksi(barang1, true, 2);
   // transaksi(barang1, false, 1, 150000);
   // transaksi(barang1, false, 1, 50000);
 
   // stockPenjualan(barang1, 3);
-  print("\n========= KOPERASI ========");
-  print("==== TOTAL STOK BARANG ====");
-  print("nama | stok | harga | total ");
-  totalStock(koperasi, "Buku Tulis", 3);
-  totalStock(koperasi, "Pulpen", 10);
-  totalStock(koperasi, "Blupen", 5);
+  // print("\n========= KOPERASI ========");
+  // print("==== TOTAL STOK BARANG ====");
+  // print("nama | stok | harga | total ");
+  // totalStock(koperasi, "Buku Tulis", 3);
+  // totalStock(koperasi, "Pulpen", 10);
+  // totalStock(koperasi, "Blupen", 5);
 
-  lowStock(koperasi);
+  // lowStock(koperasi);
 
   runApp(const MyApp());
 }
