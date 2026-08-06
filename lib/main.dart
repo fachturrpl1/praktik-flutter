@@ -23,6 +23,10 @@ class Barang {
     }
   }
 
+  bool bisaDijual(int diminta) {
+    return stock >= diminta;
+  }
+  
 Barang({
   required this.namaBarang,
   required this.hargaMember,
@@ -30,6 +34,7 @@ Barang({
   required this.stock,
   required this.kategori,
 });
+
 
 void tampilkanKartuBarang(){
   print("\n=== KARTU DATA BARANG ===");
