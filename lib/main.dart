@@ -78,8 +78,8 @@ void daftarBarangBernomor(List<Barang> daftarBarang) {
 double hitungHarga(bool anggota, double hAnggota, double hUmum) {
   return anggota ? hAnggota : hUmum;
 }
-double hitungTotal(int jumlah, double harga) {
-  return jumlah * harga;
+double nilaiStok(double harga, int jumlah) {
+  return harga * jumlah;
 }
 double hitungNominalPotongan(double total, double persenPotongan) {
   return (total * persenPotongan / 100);
@@ -88,13 +88,13 @@ double hitungHargaAkhir(double total, double persenPotongan) {
   return total - hitungNominalPotongan(total, persenPotongan);
 }
 double bayarAkhir(int jumlah, double hargaSatuan, double persenPotongan){
-  double totalAwal = hitungTotal(jumlah, hargaSatuan);
+  double totalAwal = nilaiStok(hargaSatuan, jumlah);
   return hitungHargaAkhir(totalAwal, persenPotongan);
 }
 
 void transaksi(Barang barang, bool member, int jumlah) {
   double hargaSatuan = hitungHarga(member, barang.hargaMember, barang.hargaUmum);
-  double totalAwal = hitungTotal(jumlah, hargaSatuan);
+  double totalAwal = nilaiStok(hargaSatuan, jumlah);
 
   if (totalAwal <= 0) {
     print("\n=== TRANSAKSI ===");
