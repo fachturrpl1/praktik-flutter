@@ -220,6 +220,20 @@ void main() {
    3. Kode lebih bersih, rapi, terstruktur
 */
 
+/* 
+  Apa Keuntungan memodelkan barang sebagai objek bagi pengembangan sistem koperasi kedepan?
+   1. Mudah menambah fitur baru, seperti stok otomatis berkurang, diskon khusus, atau tanggal kadaluarsa 
+      cukup dengan mengedit 'class Barang' tanpa merusak kode utama.
+   
+   2. Kode Dapat Digunakan Kembali seperti Objek 'Barang' bisa dipakai 
+      di berbagai modul sistem koperasi sekaligus, mulai dari kasir, laporan 
+      stok gudang, hingga aplikasi mobile anggota.
+   
+   3. Kemudahan Integrasi Database, Struktur berbasis objek selaras 
+      dengan format data seperti JSON/API sehingga 
+      sistem siap dihubungkan ke backend/server
+*/
+
   // transaksi(barang1, true, 2);
   // transaksi(barang1, false, 1, 150000);
   // transaksi(barang1, false, 1, 50000);
