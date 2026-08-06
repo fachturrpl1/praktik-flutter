@@ -26,25 +26,42 @@ class Barang {
   bool bisaDijual(int diminta) {
     return stock >= diminta;
   }
-  
-Barang({
-  required this.namaBarang,
-  required this.hargaMember,
-  required this.hargaUmum,
-  required this.stock,
-  required this.kategori,
-});
 
+  Barang({
+    required this.namaBarang,
+    required this.hargaMember,
+    required this.hargaUmum,
+    required this.stock,
+    required this.kategori,
+  });
 
-void tampilkanKartuBarang(){
-  print("\n=== KARTU DATA BARANG ===");
-  print("nama barang: ${namaBarang}");
-  print("harga anggota: ${formatRupiah.format(hargaMember)}");
-  print("harga umum: ${formatRupiah.format(hargaUmum)}");
-  print("jumlah stok: ${stock}");
-  print("tersedia: ${statusBarang(cekTersedia())}");
-  print('Lokasi berada di: ${lokasiRak(kategori)}');
+  void tampilkanKartuBarang(){
+    print("\n=== KARTU DATA BARANG ===");
+    print("nama barang: ${namaBarang}");
+    print("harga anggota: ${formatRupiah.format(hargaMember)}");
+    print("harga umum: ${formatRupiah.format(hargaUmum)}");
+    print("jumlah stok: ${stock}");
+    print("tersedia: ${statusBarang(cekTersedia())}");
+    print('Lokasi berada di: ${lokasiRak(kategori)}');
+  }
 }
+
+class Pembeli {
+  final String nama;
+  bool statusAnggota;
+
+  Pembeli({
+    required this.nama,
+    required this.statusAnggota,
+  });
+
+  bool cekStatus(statusAnggota){
+    if (statusAnggota) {
+      return true;
+    } else {
+      return false;
+    }
+  } 
 }
 
 
