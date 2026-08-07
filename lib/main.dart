@@ -12,8 +12,34 @@ class Barang {
   final double hargaMember;
   final double hargaUmum;
   final String kategori;
-  int stock;
+  int _stock;
   double potongan = 0;
+
+  Barang({
+    required this.namaBarang,
+    required this.hargaMember,
+    required this.hargaUmum,
+    required int stock,
+    required this.kategori,
+  }) : _stock = stock;
+
+  //getter
+  int get stock => _stock;
+  
+  bool bisaDijual(int diminta) {
+    return _stock >= diminta;
+  }
+
+  bool jual(int n) {
+    if (bisaDijual(n)) {
+      _stock -= n;
+      print("Berhasil menjual $n pcs $namaBarang. Sisa stok: $_stock");
+      return true;
+    } else {
+      print("Gagal menjual $namaBarang! Stok tidak mencukupi (Tersedia: $_stock, Diminta: $n)");
+      return false;
+    }
+  }
 
   bool cekTersedia() {
     if (stock > 0) {
@@ -23,26 +49,34 @@ class Barang {
     }
   }
 
-  bool bisaDijual(int diminta) {
-    return stock >= diminta;
-  }
 
-  Barang({
-    required this.namaBarang,
-    required this.hargaMember,
-    required this.hargaUmum,
-    required this.stock,
-    required this.kategori,
-  });
 
   void tampilkanKartuBarang(){
     print("\n=== KARTU DATA BARANG ===");
     print("nama barang: ${namaBarang}");
     print("harga anggota: ${formatRupiah.format(hargaMember)}");
     print("harga umum: ${formatRupiah.format(hargaUmum)}");
-    print("jumlah stok: ${stock}");
+    print("jumlah stok: ${_stock}");
     print("tersedia: ${statusBarang(cekTersedia())}");
     print('Lokasi berada di: ${lokasiRak(kategori)}');
+  }
+}
+
+class BarangPromo extends Barang {
+  double diskonPromo;
+
+  BarangPromo({
+    required super.namaBarang,
+    required super.hargaMember,
+    required super.hargaUmum,
+    required super.stock,
+    required super.kategori,
+    required this.diskonPromo,
+  });
+
+  double hitungHargaPromo(bool isMember){
+    double harga = isMember ? hargaMember : hargaUmum;
+    return harga - (harga * diskonPromo);
   }
 }
 
@@ -157,9 +191,9 @@ void transaksi(Barang barang, bool member, int jumlah) {
 
 void stockPenjualan(Barang barang, int stock){
   print("\n--- Penjualan ${barang.namaBarang} ---");
-  while (barang.stock > 0) { //jika operator '> 0' dihapus, akan menyebabkan infinite loop
-    barang.stock--; //jika line ini dihapus, akan menyebabkan infinite loop
-    print("Terjual 1, sisa stok: ${barang.stock}");
+  while (barang._stock > 0) { //jika operator '> 0' dihapus, akan menyebabkan infinite loop
+    barang._stock--; //jika line ini dihapus, akan menyebabkan infinite loop
+    print("Terjual 1, sisa stok: ${barang._stock}");
   }
   // 1. Jika kondisi berhenti pada 'while' keliru:
   // - Program dapat mengalami 'infinite loop'
@@ -194,8 +228,8 @@ void totalStock(List<Barang> daftarBarang, String namaBarang, int stock) {
 void lowStock(List<Barang> daftarBarang) {
   print("\n==== STOK MENIPIS ====");
   for (var barang in daftarBarang) {
-    if (barang.stock < 5) {
-      print("${barang.namaBarang}: sisa ${barang.stock} pcs (Kategori: ${barang.kategori})");
+    if (barang._stock < 5) {
+      print("${barang.namaBarang}: sisa ${barang._stock} pcs (Kategori: ${barang.kategori})");
     }
   }
 }
@@ -226,15 +260,33 @@ void main() {
     kategori: "makanan",
   );
 
+  BarangPromo barang4 = BarangPromo(
+    namaBarang: "Roti lapis",
+    hargaMember: 5000.0,
+    hargaUmum: 6000.0,
+    stock: 10,
+    kategori: "makanan",
+    diskonPromo: 0.2,
+  );
+
   List<Barang> koperasi = [barang1, barang2, barang3];
 
 //memanggil fungsi
   // daftarBarangBernomor(koperasi);
-  print("===| DAFTAR BARANG KOPERASI |===");
-  for (var barang in koperasi) {
-    barang.tampilkanKartuBarang();
-  }
 
+  // print("===| DAFTAR BARANG KOPERASI |===");
+  // for (var barang in koperasi) {
+  //   barang.tampilkanKartuBarang();
+  // }
+  
+  barang1.jual(2);
+
+  double promoMember = barang4.hitungHargaPromo(false);
+  print("\nHarga Umum (Promo) : ${formatRupiah.format(promoMember)}");
+
+  double promoUmum = barang4.hitungHargaPromo(true);
+  print("\nHarga member (Promo) : ${formatRupiah.format(promoUmum)}");
+  
 /*
    1. Data & method dibungkus dalam class 'Barang', bukan diluarnya
    2. Tambah barang cukup buat object baru & masuk List<Barang>;
