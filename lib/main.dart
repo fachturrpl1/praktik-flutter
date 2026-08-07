@@ -97,6 +97,22 @@ class BarangPromo extends Barang {
   }
 }
 
+class BarangGrosir extends Barang {
+  int minBeli;
+  double potonganGrosir;
+
+  BarangGrosir({
+    required super.namaBarang,
+    required super.hargaMember,
+    required super.hargaUmum,
+    required super.stock,
+    required super.kategori,
+    required this.minBeli,
+    required this.potonganGrosir,
+  });
+
+}
+
 class Pembeli {
   final String nama;
   bool statusAnggota;
