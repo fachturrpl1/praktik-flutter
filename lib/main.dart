@@ -49,6 +49,11 @@ class Barang {
     }
   }
 
+  // Mengapa melindungi _stok penting bagi integritas data koperasi?
+  // 1. Mencegah Modifikasi diluar class
+  // 2. Konsistensi Perubahan stok wajib melalui transaksi resmi (method jual()), 
+  //    sehingga riwayat pencatatan barang masuk/keluar di sistem koperasi selalu sinkron dengan stok fisik.
+  // 3. Serta pada method cekTersedia berfungsi untuk menghindari Stok Negatif
 
 
   void tampilkanKartuBarang(){
