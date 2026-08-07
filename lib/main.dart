@@ -61,7 +61,7 @@ class Barang {
     print("nama barang: ${namaBarang}");
     print("harga anggota: ${formatRupiah.format(hargaMember)}");
     print("harga umum: ${formatRupiah.format(hargaUmum)}");
-    print("jumlah stok: ${_stock}");
+    print("jumlah stok: ${stock}");
     print("tersedia: ${statusBarang(cekTersedia())}");
     print('Lokasi berada di: ${lokasiRak(kategori)}');
   }
@@ -82,6 +82,18 @@ class BarangPromo extends Barang {
   double hitungHargaPromo(bool isMember){
     double harga = isMember ? hargaMember : hargaUmum;
     return harga - (harga * diskonPromo);
+  }
+
+  @override
+  void tampilkanKartuBarang(){
+    print("\n=== KARTU DATA BARANG [PROMO] ===");
+    print("nama barang: ${namaBarang}");
+    print("harga anggota: dari ${formatRupiah.format(hargaMember)} ke ${formatRupiah.format(hitungHargaPromo(true))}🔥");
+    print("harga umum: dari ${formatRupiah.format(hargaUmum)} ke ${formatRupiah.format(hitungHargaPromo(false))}");
+    print("jumlah stok: ${stock}");
+    print("Diskon Promo: ${diskonPromo * 100}%");
+    print("tersedia: ${statusBarang(cekTersedia())}");
+    print('Lokasi berada di: ${lokasiRak(kategori)}');
   }
 }
 
@@ -274,23 +286,15 @@ void main() {
     diskonPromo: 0.2,
   );
 
-  List<Barang> koperasi = [barang1, barang2, barang3];
+  List<Barang> koperasi = [barang1, barang2, barang3, barang4];
 
 //memanggil fungsi
   // daftarBarangBernomor(koperasi);
 
-  // print("===| DAFTAR BARANG KOPERASI |===");
-  // for (var barang in koperasi) {
-  //   barang.tampilkanKartuBarang();
-  // }
-  
-  barang1.jual(2);
-
-  double promoMember = barang4.hitungHargaPromo(false);
-  print("\nHarga Umum (Promo) : ${formatRupiah.format(promoMember)}");
-
-  double promoUmum = barang4.hitungHargaPromo(true);
-  print("\nHarga member (Promo) : ${formatRupiah.format(promoUmum)}");
+  print("===| DAFTAR BARANG KOPERASI |===");
+  for (var barang in koperasi) {
+    barang.tampilkanKartuBarang();
+  }
   
 /*
    1. Data & method dibungkus dalam class 'Barang', bukan diluarnya
