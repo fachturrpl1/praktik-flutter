@@ -8,28 +8,27 @@ final formatRupiah = NumberFormat.currency(
   );
 
 class Barang {
-  final String namaBarang;
-  final double hargaMember;
-  final double hargaUmum;
-  final String kategori;
+  String namaBarang;
+  double hargaUmum;
+  double hargaMember;
+  String kategori;
   int _stock;
-  double potongan = 0;
-
+  
   Barang({
     required this.namaBarang,
-    required this.hargaMember,
     required this.hargaUmum,
-    required int stock,
+    required this.hargaMember,
     required this.kategori,
+    required int stock,
   }) : _stock = stock;
 
-  //getter
   int get stock => _stock;
-  
+
   bool bisaDijual(int diminta) {
     return _stock >= diminta;
   }
 
+  //method untuk mengurangi stok barang
   bool jual(int n) {
     if (bisaDijual(n)) {
       _stock -= n;
@@ -41,20 +40,30 @@ class Barang {
     }
   }
 
+  //method untuk menambah stok barang
+  void tambahStok(int n) {
+    if (n <= 0) {
+      print("Jumlah restock tidak valid, diabaikan.");
+      return;
+    }
+    _stock += n;
+    print("Restock $namaBarang sebanyak $n. Stok sekarang: $_stock");
+  }
+
   bool cekTersedia() {
     if (stock > 0) {
       return true;
     } else {
       return false;
     }
+    /*
+    Mengapa melindungi _stok penting bagi integritas data koperasi?
+    1. Mencegah Modifikasi diluar class
+    2. Konsistensi Perubahan stok wajib melalui transaksi resmi (method jual()), 
+      sehingga riwayat pencatatan barang masuk/keluar di sistem koperasi selalu sinkron dengan stok fisik.
+    3. Serta pada method cekTersedia berfungsi untuk menghindari Stok Negatif
+    */
   }
-
-  // Mengapa melindungi _stok penting bagi integritas data koperasi?
-  // 1. Mencegah Modifikasi diluar class
-  // 2. Konsistensi Perubahan stok wajib melalui transaksi resmi (method jual()), 
-  //    sehingga riwayat pencatatan barang masuk/keluar di sistem koperasi selalu sinkron dengan stok fisik.
-  // 3. Serta pada method cekTersedia berfungsi untuk menghindari Stok Negatif
-
 
   void tampilkanKartuBarang(){
     print("\n=== KARTU DATA BARANG ===");
@@ -131,7 +140,6 @@ class Pembeli {
   } 
 }
 
-
 String statusBarang(bool tersedia) {
   switch (tersedia) {
     case true:
@@ -154,20 +162,10 @@ String lokasiRak(String kategori) {
   }
 }
 
-void daftarBarangBernomor(List<Barang> daftarBarang) {
-  print("\n=== DAFTAR BARANG ===");
-  for (int i = 0; i < daftarBarang.length; i++){
-    String nomor = "${i + 1}. ";
-    String barang = "${daftarBarang[i].namaBarang}";
-    String harga = "${formatRupiah.format(daftarBarang[i].hargaUmum)}";
-    print("${nomor}${barang} - ${harga}");
-  }
-}
-
-double hitungHarga(bool anggota, double hAnggota, double hUmum) {
+double pilihHargaKeanggotaan(bool anggota, double hAnggota, double hUmum) {
   return anggota ? hAnggota : hUmum;
 }
-double nilaiStok(double harga, int jumlah) {
+double totalBeli(double harga, int jumlah) {
   return harga * jumlah;
 }
 double hitungNominalPotongan(double total, double persenPotongan) {
@@ -177,69 +175,97 @@ double hitungHargaAkhir(double total, double persenPotongan) {
   return total - hitungNominalPotongan(total, persenPotongan);
 }
 double bayarAkhir(int jumlah, double hargaSatuan, double persenPotongan){
-  double totalAwal = nilaiStok(hargaSatuan, jumlah);
+  double totalAwal = totalBeli(hargaSatuan, jumlah);
   return hitungHargaAkhir(totalAwal, persenPotongan);
 }
+int? prosesBeliHelper(String input) {
+  try {
+    return int.parse(input);
+  } catch (e) {
+    print("\n'$input' bukan berupa angka valid, masukkan angka!");
+    return null;
+  }
+}
 
-void transaksi(Barang barang, bool member, int jumlah) {
-  double hargaSatuan = hitungHarga(member, barang.hargaMember, barang.hargaUmum);
-  double totalAwal = nilaiStok(hargaSatuan, jumlah);
+//menampilkan daftar barang bernomor
+void daftarBarangBernomor(List<Barang> daftarBarang) {
+  print("\n=== DAFTAR BARANG (pilih nomor untuk transaksi) ===");
+  for (int i = 0; i < daftarBarang.length; i++) {
+    String nomor = "${i + 1}. ";
+    String nama = daftarBarang[i].namaBarang;
+    String harga = formatRupiah.format(daftarBarang[i].hargaUmum);
+    print("$nomor$nama - $harga");
+  }
+}
 
-  if (totalAwal <= 0) {
+//proses inti
+void transaksi(Barang barang, bool member, String inputJumlah) {
+  try {
+    //validasi angka
+    int? jumlah = prosesBeliHelper(inputJumlah);
+    if (jumlah == null) return;
+
+    //validasi jumlah beli
+    if (jumlah <= 0) {
+      print("Jumlah beli harus lebih dari 0!");
+      print("Transaksi dibatalkan");
+      return;
+    }
+
+    //menentukan harga berdasarkan keanggotaan
+    double hargaSatuan = pilihHargaKeanggotaan(member, barang.hargaMember, barang.hargaUmum);
+    double totalAwal= totalBeli(hargaSatuan, jumlah);
+
+    //cek jika total harga bernilai negatif
+    if (totalAwal <= 0) {
+      print("\nTotal harga tidak valid, Transaksi dibatalkan");
+      return;
+    }
+
+    //mengecek stock sebelum mengurangi stok, prevent stock menjadi negatif
+    if (jumlah > barang.stock) {
+      print("\nTransaksi gagal, jumlah beli $jumlah melebihi stok yang tersisa ${barang.stock}");
+    } else if (jumlah <= 0) {
+      print("\nJumlah beli harus lebih dari 0!");
+    }
+
+    //menentukan persen potongan
+    double persenPotongan = 0;
+    if (member && (hargaSatuan > 500000)){
+      persenPotongan = 0.15;
+    } else if (hargaSatuan > 200000) {
+      persenPotongan = 0.1;
+    } else if (hargaSatuan > 100000) {
+      persenPotongan = 0.05;
+    }
+
+    //dapat potongan berapa Rp dan juga harga yang harus dibayar
+    double nominalPotongan = hitungNominalPotongan(totalAwal, persenPotongan);
+    double hargaAkhir = bayarAkhir(jumlah, hargaSatuan, persenPotongan);
+
+    //mengurangi stok
+    barang.jual(jumlah);
+
+    //struk transaksi
     print("\n=== TRANSAKSI ===");
-    print("Total harga tidak valid. Transaksi dibatalkan.");
-    return;
+    print('Member            : ${member ? "Ya" : "Tidak"}');
+    print('Nama barang       : ${barang.namaBarang}');
+    print('Harga satuan      : ${formatRupiah.format(hargaSatuan)}');
+    print('Jumlah beli       : $jumlah');
+    print('Total belanja awal: ${formatRupiah.format(totalAwal)}');
+    print('Potongan          : ${(persenPotongan * 100).toStringAsFixed(0)}%');
+    print('Nominal potongan  : ${formatRupiah.format(nominalPotongan)}');
+    print('=' * 28);
+    print('Total harga akhir : ${formatRupiah.format(hargaAkhir)}');
+    print('Sisa stok         : ${barang.stock}');
+  } catch(e) {
+    print("Terjadi kesalahan, membatalkan transaksi");
+  } finally {
+    print("Transaksi dicatat di log.");
   }
-
-  double harga = 0;
-  if (member) {
-    harga = barang.hargaMember;
-  } else {
-    harga = barang.hargaUmum;
-  }
-
-  double persenPotongan = 0;
-  if (member && (harga > 500000)){
-    persenPotongan = 0.15;
-  } else if (harga > 200000) {
-    persenPotongan = 0.1;
-  } else if (harga > 100000) {
-    persenPotongan = 0.05;
-  }
-
-  double nominalPotongan = hitungNominalPotongan(totalAwal, persenPotongan);
-  double hargaAkhir = bayarAkhir(jumlah, hargaSatuan, persenPotongan);
-
-  print("\n=== TRANSAKSI ===");
-  print('Member            : ${member ? "Ya" : "Tidak"}');
-  print('Nama barang       : ${barang.namaBarang}');
-  print('Harga barang      : ${formatRupiah.format(hargaSatuan)}');
-  print('Jumlah beli       : $jumlah');
-  print('Total belanja awal: ${formatRupiah.format(totalAwal)}');
-  print('Potongan          : $persenPotongan%');
-  print('Nominal potongan  : ${formatRupiah.format(nominalPotongan)}');
-  print('=' * 28);
-  print('Total harga akhir : ${formatRupiah.format(hargaAkhir)}');
 }
 
-void stockPenjualan(Barang barang, int stock){
-  print("\n--- Penjualan ${barang.namaBarang} ---");
-  while (barang._stock > 0) { //jika operator '> 0' dihapus, akan menyebabkan infinite loop
-    barang._stock--; //jika line ini dihapus, akan menyebabkan infinite loop
-    print("Terjual 1, sisa stok: ${barang._stock}");
-  }
-  // 1. Jika kondisi berhenti pada 'while' keliru:
-  // - Program dapat mengalami 'infinite loop'
-  // - Menimbulkan laporan keuangan/stok tidak valid.
-
-  // 2. Cara memastikan koperasi tidak menjual melebihi stok:
-  // - Menggunakan validasi kondisi sebelum transaksi: 'if (jumlah <= barang.stock)'.
-  // - Jika stok mencukupi, kurangi stok ('barang.stock -= jumlah') dan lanjutkan transaksi.
-  // - Jika stok kurang, batalkan transaksi dan tampilkan pesan peringatan bahwa stok tidak mencukupi.
-  // - Menjaga kondisi perulangan dengan 'while (barang.stock > 0)' agar perulangan otomatis berhenti tepat saat stok bernilai 0.
-
-}
-//data dari list 
+//mencari barang di dalam list.
 void totalStock(List<Barang> daftarBarang, String namaBarang, int stock) {
   int index = daftarBarang.indexWhere(
     (b) => b.namaBarang.toLowerCase() == namaBarang.toLowerCase(),
@@ -257,6 +283,7 @@ void totalStock(List<Barang> daftarBarang, String namaBarang, int stock) {
   }
 }
 
+//menampilkan daftar barang yang stoknya menipis
 void lowStock(List<Barang> daftarBarang) {
   print("\n==== STOK MENIPIS ====");
   for (var barang in daftarBarang) {
@@ -266,19 +293,10 @@ void lowStock(List<Barang> daftarBarang) {
   }
 }
 
-void prosesBeli(String inputJumlah) {
-  try {
-     int jumlah = int.parse(inputJumlah);
-     print("\nTransaksi berhasil! jumlah barang yang dibeli $jumlah");
-  } catch (e) {
-    print("\nTolong Masukkan angka yaa! ^v^");
-  } finally {
-    print("Transaksi dicatat di log");
-  }
-}
-void main() {
-  //daftar barang
-  Barang barang1 = Barang(
+void main() async {
+  runApp(const MyApp());
+
+  Barang bukuTulis = Barang(
     namaBarang: "Buku Tulis",
     hargaMember: 3000.0,
     hargaUmum: 3500.0,
@@ -286,17 +304,15 @@ void main() {
     kategori: "atk",
   );
 
-  barang1._stock += 10;
-
-  Barang barang2 = Barang(
+  Barang pulpen = Barang(
     namaBarang: "Pulpen",
     hargaMember: 2500.0,
     hargaUmum: 3000.0,
     stock: 10,
-    kategori: "atk"
+    kategori: "atk",
   );
 
-  Barang barang3= Barang(
+  Barang roti = Barang(
     namaBarang: "Roti",
     hargaMember: 2000.0,
     hargaUmum: 2500.0,
@@ -304,7 +320,7 @@ void main() {
     kategori: "makanan",
   );
 
-  BarangPromo barang4 = BarangPromo(
+  BarangPromo rotiLapis = BarangPromo(
     namaBarang: "Roti lapis",
     hargaMember: 5000.0,
     hargaUmum: 6000.0,
@@ -313,63 +329,17 @@ void main() {
     diskonPromo: 0.2,
   );
 
-  List<Barang> koperasi = [barang1, barang2, barang3, barang4];
+  List<Barang> koperasi = [bukuTulis, pulpen, roti ,rotiLapis];
 
-  prosesBeli("dua");
-
-  /*
-  Bagaimana penanganan galat meningkatkan kepercayaan pengurus pada sistem?
-
-  1. Stabilitas Sistem: jaminan bahwa aplikasi dapat beroperasi tanpa henti.
-    Penanganan galat mencegah aplikasi berhenti mendadak saat menerima data yang tidak valid.
-  2. Perlindungan Integritas Data: Error handling memastikan proses berhenti secara aman tanpa merusak data yang sudah ada.
-  3. User Experience: Sistem yang secara responsif memberi tahu letak kesalahan input—alih-alih mendadak mati
-    atau freeze—membantu pengguna menyelesaikan tugas mereka dengan lebih cepat dan percaya diri tanpa rasa takut merusak sistem.
-  4. Transparansi dan Jejak Audit (Audit Trail): Pencatatan log (logging) pada setiap percobaan proses sangat penting untuk
-    kebutuhan pemeliharaan (maintenance), analisis keamanan, hingga evaluasi kinerjanya di masa mendatang.
-  */
-  
-  // print("===| DAFTAR BARANG KOPERASI |===");
-  // for (var barang in koperasi) {
-  //   barang.tampilkanKartuBarang();
-  // }
-  
-/*
-   1. Data & method dibungkus dalam class 'Barang', bukan diluarnya
-   2. Tambah barang cukup buat object baru & masuk List<Barang>;
-      looping otomatis mencetak semua tanpa tambah kode cetak
-   3. Kode lebih bersih, rapi, terstruktur
-*/
-
-/* 
-  Apa Keuntungan memodelkan barang sebagai objek bagi pengembangan sistem koperasi kedepan?
-   1. Mudah menambah fitur baru, seperti stok otomatis berkurang, diskon khusus, atau tanggal kadaluarsa 
-      cukup dengan mengedit 'class Barang' tanpa merusak kode utama.
-   
-   2. Kode Dapat Digunakan Kembali seperti Objek 'Barang' bisa dipakai 
-      di berbagai modul sistem koperasi sekaligus, mulai dari kasir, laporan 
-      stok gudang, hingga aplikasi mobile anggota.
-   
-   3. Kemudahan Integrasi Database, Struktur berbasis objek selaras 
-      dengan format data seperti JSON/API sehingga 
-      sistem siap dihubungkan ke backend/server
-*/
-
-  // transaksi(barang1, true, 2);
-  // transaksi(barang1, false, 1, 150000);
-  // transaksi(barang1, false, 1, 50000);
-
-  // stockPenjualan(barang1, 3);
-  // print("\n========= KOPERASI ========");
-  // print("==== TOTAL STOK BARANG ====");
-  // print("nama | stok | harga | total ");
-  // totalStock(koperasi, "Buku Tulis", 3);
-  // totalStock(koperasi, "Pulpen", 10);
-  // totalStock(koperasi, "Blupen", 5);
-
-  // lowStock(koperasi);
-
-  runApp(const MyApp());
+  print("\n===| DAFTAR BARANG KOPERASI BRANTAS MART |===");
+  for (var barang in koperasi) {
+    barang.tampilkanKartuBarang();
+  }
+  daftarBarangBernomor(koperasi);
+  transaksi(bukuTulis, true, "dua");
+  transaksi(pulpen, true, "1");
+  totalStock(koperasi, "Buku Tulis", bukuTulis.stock);
+  lowStock(koperasi);
 }
 
 class MyApp extends StatelessWidget {
