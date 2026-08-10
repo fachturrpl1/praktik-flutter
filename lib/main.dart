@@ -125,11 +125,24 @@ class BarangGrosir extends Barang {
 class Pembeli {
   final String nama;
   bool statusAnggota;
+  int _poin;
 
   Pembeli({
     required this.nama,
     required this.statusAnggota,
-  });
+    int poin = 0,
+  }) : _poin = poin;
+
+  int get poin => _poin;
+
+  void tambahPoin(int jumlahBeli) {
+    if (statusAnggota) {
+      _poin += jumlahBeli;
+      print('\n===== POIN MEMBER =====');
+      print("$nama mendapatkan $jumlahBeli poin!");
+      print("Total poin $nama : $_poin poin!");
+    }
+  }
 
   bool cekStatus(statusAnggota){
     if (statusAnggota) {
@@ -137,7 +150,7 @@ class Pembeli {
     } else {
       return false;
     }
-  } 
+  }
 }
 
 String statusBarang(bool tersedia) {
@@ -201,7 +214,7 @@ void daftarBarangBernomor(List<Barang> daftarBarang) {
 }
 
 //proses inti
-void transaksi(Barang barang, bool member, String inputJumlah) {
+void transaksi(Barang barang, bool member, String inputJumlah, Pembeli pembeli) {
   try {
     //validasi angka
     int? jumlah = prosesBeliHelper(inputJumlah);
@@ -247,6 +260,9 @@ void transaksi(Barang barang, bool member, String inputJumlah) {
 
     //mengurangi stok
     // barang.jual(jumlah);
+    if (member) {
+      pembeli.tambahPoin(jumlah);
+    }
 
     //struk transaksi
     print("\n=== TRANSAKSI ===");
@@ -315,8 +331,35 @@ Future<bool>muatLaporan({bool success = false}) async {
   }
 }
 
+/*
+1.Perancangan data membantu inventaris koperasi dimana ada tipe data yang jelas di masing-masing variabel
+  seperti stok, harga, perhitungan barang, dll.
+2.Perancangan kemungkinan seperti kapan adanya diskon, potongan harga, untuk siapa, sangat membantu untuk
+  efisiensi, integritas data keuangan, serta strategi bagi koperasi.
+3.Perulangan membantu koperasi agar tidak berulang menuliskan daftar nama, harga, secara manual
+  sehingga otomasi(perulangan) ini meningkatkan efisiensi dan juga kecepatan koperasi & mempercepat proses
+  transaksi.
+4.Penggunaan fungsi sangat berperan penting karena blok kode dapat digunakan kembali,
+  sehingga kode program tidak usah ditulis secara berulang, hal ini sangat membantu koperasi dalam membuat
+  kode penting dan berulang, karena minim human error karena typo, yang bisa menyebabkan kesalahan fatal
+  dalam sistem.
+5.Tanpa Kelas dan Objek, sistem koperasi akan menjadi sekumpulan variabel dan fungsi terpisah yang sangat
+  rumit, yang rentan serta sulit untuk dikembangkan. Dengan adanya Kelas, variabel yang saling berhubungan
+  dapat dikelompokkan ke dalam lingkupnya sendiri, sehingga kode menjadi jauh lebih mudah dirawat.
+6.Melalui enkapsulasi, sistem koperasi dapat menyembunyikan data sensitif.Data tersebut hanya dapat
+  diakses melalui method resmi. Sangat krusial bagi koperasi untuk mencegah bug, manipulasi, stok bernilai
+  negatif. lalu pewarisan memberikan efisiensi saat koperasi perlu menambah berbagai jenis produk baru.
+  cukup membuat satu kelas induk, lalu Variasi seperti BarangPromo atau BarangGrosir tinggal mewarisi.
+7.Validasi berfungsi sebagai pertahanan yang menjaga koperasi tetap stabil dan terhindar dari crash akibat
+  kesalahan. Dengan menyaring input yang tidak sesuai secara otomatis mencegah terjadinya hal-hal yang
+  tidak diinginkan. dengan adanya validasi integritas tetap terjaga.
+8.Penggunaan Future, async, dan await membuat sistem kasir koperasi dapat menjalankan proses berat seperti
+  memuat data ke latar belakang tanpa menghentikan aplikasi. Hal ini memastikan kasir dapat tetap melayani
+  transaksi meski proses data masih berjalan di balik layar hingga laporan siap ditampilkan.
+*/
+
 void main() async {
-  bool laporanSiap =  await muatLaporan(success: false);
+  bool laporanSiap =  await muatLaporan(success: true);
   if (!laporanSiap) {
     return;
   }
@@ -357,13 +400,18 @@ void main() async {
 
   List<Barang> koperasi = [bukuTulis, pulpen, roti ,rotiLapis];
 
+  Pembeli fachtur = Pembeli(
+    nama: "Fachtur",
+    statusAnggota: true,
+  );
+
   print("\n===| DAFTAR BARANG KOPERASI BRANTAS MART |===");
   for (var barang in koperasi) {
     barang.tampilkanKartuBarang();
   }
   daftarBarangBernomor(koperasi);
-  transaksi(bukuTulis, true, "dua");
-  transaksi(pulpen, true, "1");
+  transaksi(bukuTulis, true, "dua", fachtur);
+  transaksi(pulpen, true, "1", fachtur);
   totalStock(koperasi, "Buku Tulis", bukuTulis.stock);
   lowStock(koperasi);
 
