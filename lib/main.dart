@@ -182,14 +182,16 @@ int? prosesBeliHelper(String input) {
   try {
     return int.parse(input);
   } catch (e) {
-    print("\n'$input' bukan berupa angka valid, masukkan angka!");
+    print('\n=== TRANSAKSI ===');
+    print("'$input' bukan berupa angka valid, masukkan angka!");
+    print('='*17);
     return null;
   }
 }
 
 //menampilkan daftar barang bernomor
 void daftarBarangBernomor(List<Barang> daftarBarang) {
-  print("\n=== DAFTAR BARANG (pilih nomor untuk transaksi) ===");
+  print("\n=== DAFTAR BARANG ===");
   for (int i = 0; i < daftarBarang.length; i++) {
     String nomor = "${i + 1}. ";
     String nama = daftarBarang[i].namaBarang;
@@ -244,7 +246,7 @@ void transaksi(Barang barang, bool member, String inputJumlah) {
     double hargaAkhir = bayarAkhir(jumlah, hargaSatuan, persenPotongan);
 
     //mengurangi stok
-    barang.jual(jumlah);
+    // barang.jual(jumlah);
 
     //struk transaksi
     print("\n=== TRANSAKSI ===");
@@ -258,6 +260,8 @@ void transaksi(Barang barang, bool member, String inputJumlah) {
     print('=' * 28);
     print('Total harga akhir : ${formatRupiah.format(hargaAkhir)}');
     print('Sisa stok         : ${barang.stock}');
+    barang.jual(jumlah);
+    print('='*28);
   } catch(e) {
     print("Terjadi kesalahan, membatalkan transaksi");
   } finally {
@@ -275,9 +279,8 @@ void totalStock(List<Barang> daftarBarang, String namaBarang, int stock) {
     Barang barangTerpilih = daftarBarang[index];
     num hargaBarang = barangTerpilih.hargaUmum;
     num total = stock * hargaBarang;
-    print(
-      "${barangTerpilih.namaBarang}: $stock x ${formatRupiah.format(hargaBarang)} = ${formatRupiah.format(total)}",
-    );
+    print("\n===== TOTAL STOCK =====");
+    print("${barangTerpilih.namaBarang}: $stock x ${formatRupiah.format(hargaBarang)} = ${formatRupiah.format(total)}",);
   } else {
     print("Barang '$namaBarang' tidak ditemukan!");
   }
@@ -293,8 +296,14 @@ void lowStock(List<Barang> daftarBarang) {
   }
 }
 
+Future<void>muatLaporan() async {
+  print('\nMenyiapkan laporan');
+  await Future.delayed(Duration(seconds: 1));
+  print('\nLaporan Siap!');
+}
+
 void main() async {
-  runApp(const MyApp());
+  await muatLaporan();
 
   Barang bukuTulis = Barang(
     namaBarang: "Buku Tulis",
@@ -303,6 +312,7 @@ void main() async {
     stock: 3,
     kategori: "atk",
   );
+  // bukuTulis.tambahStok(10);
 
   Barang pulpen = Barang(
     namaBarang: "Pulpen",
@@ -340,6 +350,8 @@ void main() async {
   transaksi(pulpen, true, "1");
   totalStock(koperasi, "Buku Tulis", bukuTulis.stock);
   lowStock(koperasi);
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
