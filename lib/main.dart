@@ -296,14 +296,30 @@ void lowStock(List<Barang> daftarBarang) {
   }
 }
 
-Future<void>muatLaporan() async {
+Future<bool>muatLaporan({bool success = false}) async {
   print('\nMenyiapkan laporan');
-  await Future.delayed(Duration(seconds: 1));
-  print('\nLaporan Siap!');
+
+  try {
+    await Future.delayed(Duration(seconds: 1));
+    if (!success) {
+      throw ("Gagal memuat laporan");
+    }
+    print('\nLaporan Siap! laporan akan segera ditampilkan');
+    return true;
+  } catch (e) {
+    print("\nGagal memuat laporan");
+    print("\nMasalah pada [$e]");
+    return false;
+  } finally {
+    print("\n=== Pemuatan dicatat di log ===");
+  }
 }
 
 void main() async {
-  await muatLaporan();
+  bool laporanSiap =  await muatLaporan(success: false);
+  if (!laporanSiap) {
+    return;
+  }
 
   Barang bukuTulis = Barang(
     namaBarang: "Buku Tulis",
