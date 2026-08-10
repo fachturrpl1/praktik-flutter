@@ -317,6 +317,18 @@ void main() {
 
   prosesBeli("dua");
 
+  /*
+  Bagaimana penanganan galat meningkatkan kepercayaan pengurus pada sistem?
+
+  1. Stabilitas Sistem: jaminan bahwa aplikasi dapat beroperasi tanpa henti.
+    Penanganan galat mencegah aplikasi berhenti mendadak saat menerima data yang tidak valid.
+  2. Perlindungan Integritas Data: Error handling memastikan proses berhenti secara aman tanpa merusak data yang sudah ada.
+  3. User Experience: Sistem yang secara responsif memberi tahu letak kesalahan input—alih-alih mendadak mati
+    atau freeze—membantu pengguna menyelesaikan tugas mereka dengan lebih cepat dan percaya diri tanpa rasa takut merusak sistem.
+  4. Transparansi dan Jejak Audit (Audit Trail): Pencatatan log (logging) pada setiap percobaan proses sangat penting untuk
+    kebutuhan pemeliharaan (maintenance), analisis keamanan, hingga evaluasi kinerjanya di masa mendatang.
+  */
+  
   // print("===| DAFTAR BARANG KOPERASI |===");
   // for (var barang in koperasi) {
   //   barang.tampilkanKartuBarang();
