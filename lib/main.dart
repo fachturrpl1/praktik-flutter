@@ -239,7 +239,6 @@ void stockPenjualan(Barang barang, int stock){
   // - Menjaga kondisi perulangan dengan 'while (barang.stock > 0)' agar perulangan otomatis berhenti tepat saat stok bernilai 0.
 
 }
-
 //data dari list 
 void totalStock(List<Barang> daftarBarang, String namaBarang, int stock) {
   int index = daftarBarang.indexWhere(
@@ -267,6 +266,16 @@ void lowStock(List<Barang> daftarBarang) {
   }
 }
 
+void prosesBeli(String inputJumlah) {
+  try {
+     int jumlah = int.parse(inputJumlah);
+     print("\nTransaksi berhasil! jumlah barang yang dibeli $jumlah");
+  } catch (e) {
+    print("\nTolong Masukkan angka yaa! ^v^");
+  } finally {
+    print("Transaksi dicatat di log");
+  }
+}
 void main() {
   //daftar barang
   Barang barang1 = Barang(
@@ -276,6 +285,8 @@ void main() {
     stock: 3,
     kategori: "atk",
   );
+
+  barang1._stock += 10;
 
   Barang barang2 = Barang(
     namaBarang: "Pulpen",
@@ -304,13 +315,12 @@ void main() {
 
   List<Barang> koperasi = [barang1, barang2, barang3, barang4];
 
-//memanggil fungsi
-  // daftarBarangBernomor(koperasi);
+  prosesBeli("dua");
 
-  print("===| DAFTAR BARANG KOPERASI |===");
-  for (var barang in koperasi) {
-    barang.tampilkanKartuBarang();
-  }
+  // print("===| DAFTAR BARANG KOPERASI |===");
+  // for (var barang in koperasi) {
+  //   barang.tampilkanKartuBarang();
+  // }
   
 /*
    1. Data & method dibungkus dalam class 'Barang', bukan diluarnya
