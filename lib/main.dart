@@ -351,7 +351,7 @@ void main() async {
   totalStock(koperasi, "Buku Tulis", bukuTulis.stock);
   lowStock(koperasi);
 
-  runApp(const MyApp());
+  runApp(const MyApp());//final
 }
 
 class MyApp extends StatelessWidget {
